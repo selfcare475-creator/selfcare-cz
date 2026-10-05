@@ -11948,12 +11948,12 @@ loadSplitCatalogData().then(()=>{
 
   scheduleNonCriticalWork(()=>{
     loadDynamicProducts().finally(()=>{
-      /* v-stable: identical data + no new products = do NOT touch the page */
-      if(window.__scDynChanged === false && !window.__scDynAddedNew) return;
-      // v104: Rebuild best sellers list from products table (admin-controlled)
+      // v109: ALWAYS rebuild category buckets from the DB-overlaid products so the
+      // grid reflects the real main_category/subcategory from the database and never
+      // keeps the stale categorization baked into products-cz.json.
       try { rebuildBestSellersFromProducts("cz"); } catch(e){}
       productCache = [];
-      // v90: use chunked async rebuild — doesn't freeze the page
+      // chunked async rebuild — doesn't freeze the page
       buildFastCategoryBucketsAsync();
     });
   }, 1500);
