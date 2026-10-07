@@ -7108,6 +7108,7 @@ function applyDynOverlayCache(){
         }catch(e){}
         return;
       }
+      if(r.ai) products[idx].active = scCleanAdminText(r.ai);
       if(r.i) products[idx].img = String(r.i);
       if(r.pr && !isNaN(Number(r.pr)) && Number(r.pr) > 0) products[idx].price = Number(r.pr);
       if(name) products[idx].name = name;
@@ -7359,6 +7360,7 @@ async function loadDynamicProducts(){
         if(displayName) products[idx].name = displayName;
         if(desc){products[idx].desc=desc;products[idx].use_override="";products[idx].use_en=useEn;products[idx].use_cz=useCz;}
         if(code)products[idx].pharmacy_code=code;
+        if(p.active_ingredient) products[idx].active=scCleanAdminText(p.active_ingredient);
         if(p.image_url) products[idx].img = p.image_url;
         if(p.main_category){
           const mappedCat = siteCategoryFromAdmin(p.main_category || p.subcategory || "");
@@ -10494,6 +10496,8 @@ function ingredientChipClass(text){
   return len > 34 ? 'ingredient-xlong' : (len > 24 ? 'ingredient-long' : '');
 }
 function productActiveIngredient(p){
+  const dbActive = String((p && p.active) || '').trim();
+  if(dbActive) return dbActive;
   const raw = normalizeText([p?.name, p?.desc].join(' '));
   const rules = [
     [['panadol','cetal','paramol'],'Paracetamol'],[['brufen'],'Ibuprofen'],[['catafast','voltaren','diclac'],'Diclofenac'],[['ketofan'],'Ketoprofen'],[['novalgin'],'Metamizole'],[['antinal'],'Nifuroxazide'],[['nanazoxid'],'Nitazoxanide'],[['streptoquin'],'Streptomycin + Iodochlorhydroxyquin'],[['enterogermina'],'Bacillus clausii'],[['ors'],'Oral rehydration salts'],[['gaviscon'],'Sodium alginate'],[['rennie'],'Calcium carbonate + Magnesium carbonate'],[['omez'],'Omeprazole'],[['nexium','nexicure'],'Esomeprazole'],[['controloc'],'Pantoprazole'],[['antodine'],'Famotidine'],[['motilium'],'Domperidone'],[['ondalenz'],'Ondansetron'],[['duspatalin'],'Mebeverine'],[['flatidyl'],'Simethicone'],[['augmentin','hibiotic'],'Amoxicillin + Clavulanic acid'],[['xithrone','zithro','azithro'],'Azithromycin'],[['suprax'],'Cefixime'],[['tavanic'],'Levofloxacin'],[['ciprofar'],'Ciprofloxacin'],[['alzental'],'Albendazole'],[['monuril'],'Fosfomycin'],[['lovir','zovirax'],'Acyclovir'],[['fucidin'],'Fusidic acid'],[['dermovate'],'Clobetasol'],[['betaderm'],'Betamethasone'],[['kenacomb'],'Triamcinolone + Neomycin'],[['acretin'],'Tretinoin'],[['azaderm'],'Azelaic acid'],[['bepanthen'],'Dexpanthenol'],[['scaro'],'Silicone scar gel'],[['flamigel'],'Hydroactive colloid gel'],[['zyrtec'],'Cetirizine'],[['telfast'],'Fexofenadine'],[['claritine','clarikan'],'Loratadine'],[['aerius'],'Desloratadine'],[['avil'],'Pheniramine'],[['nasonex','momenta'],'Mometasone'],[['normifrin'],'Oxymetazoline'],[['otrivin'],'Xylometazoline'],[['fluimucil'],'Acetylcysteine'],[['ivyrospan','ivirospan','bronchicum'],'Ivy leaf extract'],[['sinupret'],'Herbal extract blend'],[['oplex'],'Cough syrup formula'],[['polyfresh','hyfresh'],'Sodium hyaluronate'],[['tobradex'],'Tobramycin + Dexamethasone'],[['ocumethyl'],'Naphazoline + Zinc sulfate'],[['prisoline'],'Naphazoline'],[['viagra'],'Sildenafil'],[['virecta'],'Sildenafil'],[['cialis','cipalafil'],'Tadalafil'],[['gabimash'],'Gabapentin'],[['tryptizole'],'Amitriptyline'],[['cipra pro','cipra-pro'],'Escitalopram'],[['lustral'],'Sertraline'],[['melatonin','melacrst','melacryst','sleepez'],'Melatonin'],[['night calm'],'Eszopiclone'],[['kerovit'],'Multivitamin formula'],[['livabion'],'Vitamin B complex'],[['immulant'],'Immunity support formula'],[['vitamin e'],'Vitamin E'],[['folic'],'Folic acid'],[['omega'],'Omega-3'],[['magnesium'],'Magnesium'],[['feroglobin'],'Iron + Vitamins'],[['yasmin'],'Drospirenone + Ethinyl estradiol'],[['yaz'],'Drospirenone + Ethinyl estradiol'],[['gynera'],'Gestodene + Ethinyl estradiol'],[['progest'],'Progesterone'],[['steronate'],'Norethisterone'],[['gynozole'],'Miconazole'],[['fungican'],'Fluconazole'],[['mounjaro'],'Tirzepatide'],[['ozempic','wegovy','rybelsus'],'Semaglutide'],[['saxenda'],'Liraglutide'],[['glucophage'],'Metformin'],[['forxiga'],'Dapagliflozin'],[['concor'],'Bisoprolol'],[['coveram'],'Perindopril + Amlodipine'],[['plavix'],'Clopidogrel'],[['aspirin protect'],'Acetylsalicylic acid']
@@ -12883,7 +12887,12 @@ function scStripDigits(el){
   </div>
   <div id="myOrdersBody" style="flex:1;overflow-y:auto;padding:12px 16px"></div>
 </div>
-<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0243066983514c039bb46ce3bb00bfd9"}'></script><!-- Cloudflare Pages Analytics --><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0243066983514c039bb46ce3bb00bfd9"}'></script><!-- Cloudflare Pages Analytics --><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0243066983514c039bb46ce3bb00bfd9"}'></script><!-- Cloudflare Pages Analytics --></body>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0243066983514c039bb46ce3bb00bfd9"}'></script><!-- Cloudflare Pages Analytics --><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0243066983514c039bb46ce3bb00bfd9"}'></script><!-- Cloudflare Pages Analytics --><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0243066983514c039bb46ce3bb00bfd9"}'></script><!-- Cloudflare Pages Analytics --><!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0243066983514c039bb46ce3bb00bfd9"}'></script><!-- Cloudflare Pages Analytics --><footer style="background:#0f766e;color:#fff;padding:22px 16px;text-align:center;font-family:Nunito,Arial,sans-serif;font-size:13px;line-height:1.8">
+<div style="font-weight:800;font-size:15px">Self Care Pharmacy - Dr. Awny</div>
+<div>Registrační číslo lékárny: 257 &middot; Sherry Street, behind Sherry Hotel, Hurghada, Red Sea, Egypt</div>
+<div>WhatsApp: <a href="https://wa.me/201501401779" style="color:#fff">+20 150 140 1779</a> &middot; <a href="mailto:selfcare475@gmail.com" style="color:#fff">selfcare475@gmail.com</a></div>
+<div style="margin-top:8px"><a href="/o-nas" style="color:#fff;margin:0 8px;text-decoration:underline">O nás</a><a href="/kontakt" style="color:#fff;margin:0 8px;text-decoration:underline">Kontakt</a><a href="/ochrana-osobnich-udaju" style="color:#fff;margin:0 8px;text-decoration:underline">Ochrana osobních údajů</a></div>
+</footer></body>
 </html>
 
 
