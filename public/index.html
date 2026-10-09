@@ -7983,6 +7983,7 @@ function setDisplayLanguage(language){
   localStorage.setItem("selfcare_display_currency", displayCurrency);
   updateCurrencyButtons();
   applyLanguage();
+  try{ scUpdateMyOrdersBtn(); var mp=document.getElementById("myOrdersPanel"); if(mp && mp.style.display==="flex") scOpenMyOrders(); }catch(e){}
   attachSearchEvents();
   lastRenderedSearchValue = null;
   scheduleSearchRefresh();
@@ -12844,6 +12845,7 @@ function scSaveOrderToHistory(orderId, order){
 function scOrderHistText(key){
   var lang = "en";
   try{ if(typeof displayLanguage !== "undefined" && displayLanguage) lang = displayLanguage; }catch(e){}
+  if(lang === "ua") lang = "uk";
   var D = {
     title:   {cs:"🧾 Vaše předchozí objednávky", en:"🧾 Your previous orders", de:"🧾 Ihre früheren Bestellungen", ru:"🧾 Ваши прошлые заказы", uk:"🧾 Ваші попередні замовлення", pl:"🧾 Twoje poprzednie zamówienia"},
     reorder: {cs:"↻ Objednat znovu", en:"↻ Order again", de:"↻ Erneut bestellen", ru:"↻ Заказать снова", uk:"↻ Замовити знову", pl:"↻ Zamów ponownie"},
@@ -12921,7 +12923,7 @@ var SC_TRACK_TXT = {
   uk:{receipt:"⬇ Завантажити чек (PDF)",s1:"Замовлення прийнято",s2:"Готуємо",s3:"Кур’єр забрав замовлення",s4:"В дорозі до вас",s5:"Доставлено",h1:"Ми отримали ваше замовлення",h2:"Ваше замовлення готується",h3:"Замовлення у кур’єра",h4:"В дорозі до вас",h5:"Доставлено — будьте здорові!",hx:"Замовлення скасовано",eta:"Доставка",today:"сьогодні",tomorrow:"завтра",around:"близько",items:"шт.",help:"Потрібна допомога? WhatsApp",reorder:"↻ Замовити знову",deliveredAt:"Доставлено",details:"Деталі замовлення",subtotal:"Товари",delivery:"Доставка",free:"Безкоштовно",total:"Разом",room:"Номер"},
   pl:{receipt:"⬇ Pobierz paragon (PDF)",s1:"Zamówienie przyjęte",s2:"Przygotowujemy",s3:"Kurier odebrał zamówienie",s4:"W drodze do Ciebie",s5:"Dostarczono",h1:"Otrzymaliśmy Twoje zamówienie",h2:"Twoje zamówienie jest przygotowywane",h3:"Kurier ma Twoje zamówienie",h4:"W drodze do Ciebie",h5:"Dostarczono — na zdrowie!",hx:"Zamówienie anulowane",eta:"Dostawa",today:"dziś",tomorrow:"jutro",around:"około",items:"szt.",help:"Potrzebujesz pomocy? WhatsApp",reorder:"↻ Zamów ponownie",deliveredAt:"Dostarczono",details:"Szczegóły zamówienia",subtotal:"Produkty",delivery:"Dostawa",free:"Gratis",total:"Razem",room:"Pokój"}
 };
-function scTrackLang(){ var l="en"; try{ if(typeof displayLanguage!=="undefined"&&displayLanguage) l=String(displayLanguage); }catch(e){} return SC_TRACK_TXT[l]?l:"en"; }
+function scTrackLang(){ var l="en"; try{ if(typeof displayLanguage!=="undefined"&&displayLanguage) l=String(displayLanguage); }catch(e){} if(l==="ua") l="uk"; return SC_TRACK_TXT[l]?l:"en"; }
 function scTrackT(k){ var d=SC_TRACK_TXT[scTrackLang()]; return d[k]||SC_TRACK_TXT.en[k]||""; }
 function scTrackEsc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(m){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]; }); }
 function scTrackTime(ms){ var c=scCairoParts(ms); var h=c.h, m=String(c.mi).padStart(2,"0"); if(scTrackLang()!=="en") return String(h).padStart(2,"0")+":"+m; var ap=h>=12?"PM":"AM"; return (h%12||12)+":"+m+" "+ap; }
@@ -13197,6 +13199,7 @@ var scTrackTimer = null;
 function scMyOrdersLabel(){
   var lang = "en";
   try{ if(typeof displayLanguage !== "undefined" && displayLanguage) lang = displayLanguage; }catch(e){}
+  if(lang === "ua") lang = "uk";
   var D = {cs:"Moje objednávky", en:"My Orders", de:"Meine Bestellungen", ru:"Мои заказы", uk:"Мої замовлення", pl:"Moje zamówienia"};
   return D[lang] || D.en;
 }
