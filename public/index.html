@@ -9437,8 +9437,21 @@ function rebuildProductCache(){
   productCache = products.map((p, idx) => buildProductMeta(p, idx));
 }
 
+/* v-hide-empty-subs: a subcategory with no products is not shown; it comes back by itself
+   as soon as a product is added to it from the admin */
+var __scSubCount = null, __scSubCountN = -1;
+function scSubCounts(){
+  if(__scSubCount && __scSubCountN === products.length) return __scSubCount;
+  var c = {};
+  try{ products.forEach(function(p){ try{ var sub = productSubcat(p), main = productMainKey(p); c[main+"|"+sub] = (c[main+"|"+sub]||0) + 1; }catch(e){} }); }catch(e){}
+  __scSubCount = c; __scSubCountN = products.length; return c;
+}
 function availableSubsForMain(key){
-  return (categoryGroups[key] && categoryGroups[key].subs) ? categoryGroups[key].subs : ["Vše"];
+  var subs = (categoryGroups[key] && categoryGroups[key].subs) ? categoryGroups[key].subs : ["Vše"];
+  if(key === "top" || key === "tourist" || key === "mobility" || !products || !products.length) return subs;
+  var c = scSubCounts();
+  var shown = subs.filter(function(sub){ return (c[key+"|"+sub]||0) > 0; });
+  return shown.length ? shown : subs;
 }
 
 const mainCategoryImages = {
