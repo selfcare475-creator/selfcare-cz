@@ -10767,7 +10767,7 @@ function productActiveModalLine(p){
 function buildFilters() {
   const mainHTML = Object.entries(categoryGroups).map(([key, group]) => {
     const label = cleanMainCategoryText(key === "tourist" ? touristNeedsCategoryLabel() : mainCategoryLabel(key));
-    return `<button class="main-filter-btn cat-${key}${key===activeMain?' active':''}${key==='tourist'?' tourist-main kits-main':''}" data-main="${key}" onclick="setMainCategory('${key}')">${key==='tourist' ? '<span class="cat-hot">${scHotLabel()}</span>' : ''}${mainCategoryIconHTML(key)}<span class="cat-name">${label}</span></button>`;
+    return `<button class="main-filter-btn cat-${key}${key===activeMain?' active':''}${key==='tourist'?' tourist-main kits-main':''}" data-main="${key}" onclick="setMainCategory('${key}')">${key==='tourist' ? '<span class="cat-hot">'+scHotLabel()+'</span>' : ''}${mainCategoryIconHTML(key)}<span class="cat-name">${label}</span></button>`;
   }).join("");
 
   const availableSubs = availableSubsForMain(activeMain);
@@ -12773,7 +12773,7 @@ html body .card-img-wrap img.zoom-out {
 <style>
 .sc-version-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.5);color:#fff;padding:3px 7px;border-radius:5px;font-size:11px;font-weight:900;z-index:9999;pointer-events:none}
 </style>
-<div class="sc-version-stamp" aria-hidden="true">v108.15</div>
+<div class="sc-version-stamp" aria-hidden="true">v108.16</div>
 <!-- v98→v99: Order Success Modal — clear confirmation with order number -->
 <div id="orderSuccessOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,45,60,.72);backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:20px;font-family:inherit;">
   <div style="background:#fff;border-radius:24px;max-width:360px;width:100%;padding:0;box-shadow:0 30px 80px rgba(0,0,0,.35);text-align:center;overflow:hidden;animation:sc-order-success-in .35s cubic-bezier(.16,1,.3,1);">
@@ -13532,7 +13532,7 @@ function scStripDigits(el){
 }catch(e){}})();
 </script>
 
-<script>/* v108.15 no-delivery days (settings.no_delivery_dates) */
+<script>/* v108.16 no-delivery days (settings.no_delivery_dates) */
 (function(){try{
  var SET=null;
  var load=function(cb){ fetch(SB_URL+"/rest/v1/settings?select=key,value&key=eq.no_delivery_dates",{headers:SB_HEADERS}).then(function(r){return r.json();}).then(function(rows){ SET=((rows[0]||{}).value||"").split(",").map(function(s){return s.trim();}).filter(Boolean); cb(); }).catch(function(){}); };
