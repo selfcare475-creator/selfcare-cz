@@ -13427,7 +13427,7 @@ function scStripDigits(el){
         try{ saveCart(); }catch(e){}
         try{ updateCartBadge(); }catch(e){}
         try{ if(typeof updateVisibleCardQtyUI==="function") updateVisibleCardQtyUI(); else if(typeof smoothRenderGridSoon==="function") smoothRenderGridSoon(); }catch(e){}
-        toast(removed);
+        /* silent: the item just leaves the basket, no message (owner's choice) */
       }
     }catch(e){}
     return removed;
@@ -13461,7 +13461,6 @@ function scStripDigits(el){
   if(typeof renderCart==="function"){
     var rc=renderCart;
     renderCart=function(){ prune(); var out=rc.apply(this,arguments);
-      try{ if(lastRemoved.length){ var it=document.getElementById("cartItems"); if(it) it.insertAdjacentHTML("afterbegin",noteHtml(lastRemoved)); } }catch(e){}
       return out; };
   }
   if(typeof renderCheckout==="function"){
