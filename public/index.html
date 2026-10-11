@@ -7382,6 +7382,7 @@ async function loadDynamicProducts(){
         if(displayName) products[idx].name = displayName;
         if(desc){products[idx].desc=desc;products[idx].use_override="";products[idx].use_en=useEn;products[idx].use_cz=useCz;}
         if(code)products[idx].pharmacy_code=code;
+        if(p.name_en) products[idx].name_en=scCleanAdminText(p.name_en);
         if(p.active_ingredient) products[idx].active=scCleanAdminText(p.active_ingredient);
         if(p.image_url) products[idx].img = p.image_url;
         if(p.main_category){
@@ -7402,7 +7403,7 @@ async function loadDynamicProducts(){
       const cat = siteCategoryFromAdmin(p.main_category || p.subcategory || "Best sellers");
       const newIdx = products.length;
       window.__scDynAddedNew = true;
-      products.push({name:displayName, price:Number(p.price_egp)||0, cat:cat, img:p.image_url||FALLBACK_IMG, desc:desc, use_override:"", use_en:useEn, use_cz:useCz, active:p.active_ingredient||"", pharmacy_code:code, dynamic:true, subcategory:p.subcategory||"", display_order: p.display_order!=null?Number(p.display_order):undefined, is_bestseller_en:!!p.is_bestseller_en, is_bestseller_cz:!!p.is_bestseller_cz, bestseller_order_en:p.bestseller_order_en!=null?Number(p.bestseller_order_en):undefined, bestseller_order_cz:p.bestseller_order_cz!=null?Number(p.bestseller_order_cz):undefined});
+      products.push({name_en:scCleanAdminText(p.name_en||""), name:displayName, price:Number(p.price_egp)||0, cat:cat, img:p.image_url||FALLBACK_IMG, desc:desc, use_override:"", use_en:useEn, use_cz:useCz, active:p.active_ingredient||"", pharmacy_code:code, dynamic:true, subcategory:p.subcategory||"", display_order: p.display_order!=null?Number(p.display_order):undefined, is_bestseller_en:!!p.is_bestseller_en, is_bestseller_cz:!!p.is_bestseller_cz, bestseller_order_en:p.bestseller_order_en!=null?Number(p.bestseller_order_en):undefined, bestseller_order_cz:p.bestseller_order_cz!=null?Number(p.bestseller_order_cz):undefined});
       existing.add(displayName.toLowerCase());
       nameIndex.set(displayName.toLowerCase(), newIdx);
       if(code) codeIndex.set(code.toLowerCase(), newIdx);
@@ -11719,6 +11720,13 @@ document.addEventListener("click", function(e){
 });
 
 
+/* sk51: order lines always use the admin English name (fallback: auto-translate) */
+function scOrderNameEn(p){
+  try{ if(p && p.name_en && String(p.name_en).trim()) return String(p.name_en).trim(); }catch(e){}
+  return orderProductName(p && p.name);
+}
+/* sk51: Slovak customers get their own code 51 (Czech site stays 72) */
+function scSiteCode(){ return (typeof displayLanguage!=="undefined" && displayLanguage==="sk") ? 51 : 72; }
 function orderProductName(name){
   let n = String(name || "").trim();
 
@@ -12035,7 +12043,7 @@ function renderCheckout(){
 
   // WhatsApp order message must stay in English for pharmacy operations,
   // regardless of the customer's selected website language.
-  const lines = items.map(({product:p, qty}, i) => `${i + 1}. ${orderProductName(p.name)} x${qty} = ${livePrice(p) * qty} EGP`);
+  const lines = items.map(({product:p, qty}, i) => `${i + 1}. ${scOrderNameEn(p)} x${qty} = ${livePrice(p) * qty} EGP`);
 
   const msgText = `Hello Self Care Pharmacy, I would like to place an order:
 
@@ -12060,7 +12068,7 @@ ${lines.join("\n")}
 
 Payment on delivery.
 
-# Code 72
+# Code ${scSiteCode()}
 Thank you.`;
 
   const btn = document.getElementById("finalCheckoutBtn");
@@ -12097,15 +12105,16 @@ Thank you.`;
     delivery_day: deliveryDay,
     delivery_time: dashboardDeliveryTime,
     payment: paymentText,
-    items: items.map(({product:p, qty}) => ({ name: orderProductName(p.name), qty: qty, price: livePrice(p), total: livePrice(p) * qty })),
+    items: items.map(({product:p, qty}) => ({ name: scOrderNameEn(p), qty: qty, price: livePrice(p), total: livePrice(p) * qty })),
     product_total: total,
     delivery_fee: Number(deliveryFee) || 0,
     total: Number(finalTotal) || 0,
     status: "New",
     source: "web",
-    source_code: 72, /* v108: identifies Czech storefront in DB (integer column) */
+    source_code: scSiteCode(), /* v108: 72 = Czech storefront; sk51: 51 = Slovak customers */
     branch: BRANCH
   };
+  window.__pendingOrderRefs = items.map(({product:p}) => String(p.name||""));
   btn.onclick = async function(e){
     e.preventDefault();
     if(!window.__pendingOrder) return;
@@ -12132,8 +12141,8 @@ Thank you.`;
       const row = await createConfirmedOrder(window.__pendingOrder);
       const orderId = row && row.id ? row.id : "";
       try{ scSaveOrderToHistory(orderId, window.__pendingOrder); }catch(e){}
-      let cleanMsg = msgText.replace(/\n# Code 72\s*$/,"").trim();
-      const finalMsg = cleanMsg.replace("🛒 *Self Care Pharmacy Order*", "🛒 *Self Care Pharmacy Order*\n\nOrder Number: #"+orderId+"\nCode: 72");
+      let cleanMsg = msgText.replace(/\n# Code \d+\s*$/,"").trim();
+      const finalMsg = cleanMsg.replace("🛒 *Self Care Pharmacy Order*", "🛒 *Self Care Pharmacy Order*\n\nOrder Number: #"+orderId+"\nCode: "+(window.__pendingOrder.source_code||72));
       // v97 → v98: use wa.me only — whatsapp:// scheme showed blank page on some browsers.
       const waUrl = `https://wa.me/${WA}?text=${encodeURIComponent(finalMsg)}`;
       showCheckoutWhatsappFallback(orderId, waUrl, finalMsg);
@@ -12776,7 +12785,7 @@ html body .card-img-wrap img.zoom-out {
 <style>
 .sc-version-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.5);color:#fff;padding:3px 7px;border-radius:5px;font-size:11px;font-weight:900;z-index:9999;pointer-events:none}
 </style>
-<div class="sc-version-stamp" aria-hidden="true">v108.21</div>
+<div class="sc-version-stamp" aria-hidden="true">v108.22</div>
 <!-- v98→v99: Order Success Modal — clear confirmation with order number -->
 <div id="orderSuccessOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,45,60,.72);backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:20px;font-family:inherit;">
   <div style="background:#fff;border-radius:24px;max-width:360px;width:100%;padding:0;box-shadow:0 30px 80px rgba(0,0,0,.35);text-align:center;overflow:hidden;animation:sc-order-success-in .35s cubic-bezier(.16,1,.3,1);">
@@ -12932,7 +12941,7 @@ function scSaveOrderToHistory(orderId, order){
       id: orderId || "",
       tk: (orderId && window.__scLastCancelToken) || "",
       ts: Date.now(),
-      items: order.items.map(function(it){ return { name: String(it.name||""), qty: Number(it.qty)||1, price: Number(it.price)||0 }; }),
+      items: order.items.map(function(it, i){ var rf=(window.__pendingOrderRefs||[])[i]; return { name: String(rf||it.name||""), qty: Number(it.qty)||1, price: Number(it.price)||0 }; }),
       total: Number(order.total) || 0
     });
     if(hist.length > 5) hist = hist.slice(0, 5);
@@ -12963,6 +12972,7 @@ function scFindProductIdxByName(name){
     var p = products[i];
     if(!p || !p.name) continue;
     if(String(p.name).trim().toLowerCase() === target) return i;
+    if(p.name_en && String(p.name_en).trim().toLowerCase() === target) return i;
   }
   return -1;
 }
