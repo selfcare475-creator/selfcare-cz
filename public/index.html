@@ -10886,7 +10886,7 @@ function catalogSkeletonHtml(){
 }
 
 const CATALOG_PRODUCTS_URL = "products-cz.json?v=110";
-const CATALOG_KITS_URL = "kits-cz.json?v=108";
+const CATALOG_KITS_URL = "kits-cz.json?v=109";
 let catalogDataLoaded = false;
 let catalogDataPromise = null;
 
@@ -10914,7 +10914,10 @@ async function loadSplitCatalogData(){
 function kitResolvedItems(kit){
   return kit.items.map(it => {
     const idx = productIndexByKitItem(it);
-    return idx >= 0 ? {...it, idx, product: products[idx]} : null;
+    if(idx < 0) return null;
+    /* kits-oos: an out-of-stock item is left out of the kit (price + cart) until it is back */
+    if(typeof isOutOfStock === "function" && products[idx] && isOutOfStock(products[idx].name)) return null;
+    return {...it, idx, product: products[idx]};
   }).filter(Boolean);
 }
 function kitItemPrice(it){
@@ -10982,7 +10985,7 @@ function renderKitGrid(kitType){
   const grid = document.getElementById("grid");
   document.getElementById("countLabel").textContent = "";
   grid.classList.add("kit-grid");
-  const list = touristKits.filter(k => !kitType || (k.type || "care") === kitType);
+  const list = touristKits.filter(k => !kitType || (k.type || "care") === kitType).filter(k => kitResolvedItems(k).length >= 2); /* kits-oos: hide a kit with < 2 available items */
   grid.innerHTML = list.map(kit => {
     const items = kitResolvedItems(kit);
     const total = kitTotal(kit);
@@ -12785,7 +12788,7 @@ html body .card-img-wrap img.zoom-out {
 <style>
 .sc-version-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.5);color:#fff;padding:3px 7px;border-radius:5px;font-size:11px;font-weight:900;z-index:9999;pointer-events:none}
 </style>
-<div class="sc-version-stamp" aria-hidden="true">v108.22</div>
+<div class="sc-version-stamp" aria-hidden="true">v108.23</div>
 <!-- v98→v99: Order Success Modal — clear confirmation with order number -->
 <div id="orderSuccessOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,45,60,.72);backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:20px;font-family:inherit;">
   <div style="background:#fff;border-radius:24px;max-width:360px;width:100%;padding:0;box-shadow:0 30px 80px rgba(0,0,0,.35);text-align:center;overflow:hidden;animation:sc-order-success-in .35s cubic-bezier(.16,1,.3,1);">
