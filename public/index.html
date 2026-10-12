@@ -7637,9 +7637,11 @@ function categoryLabel(cat){ return LANG[displayLanguage]?.cats?.[cat] || cat; }
 function mainCategoryLabel(key){ return LANG[displayLanguage]?.main?.[key] || categoryGroups?.[key]?.label || key; }
 function productDisplayName(p){
   const name = typeof p === "string" ? p : (p?.name || "");
-  if(displayLanguage === "ru") return productNameRu(name);
-  if(displayLanguage === "ua") return productNameUa(name);
-  if(displayLanguage === "de") return productNameDe(name);
+  /* ru/ua/de: translate from the admin English name (cleaner than the Czech one) when we have it */
+  const base = (typeof p === "object" && p && p.name_en && String(p.name_en).trim()) ? String(p.name_en).trim() : name;
+  if(displayLanguage === "ru") return productNameRu(base);
+  if(displayLanguage === "ua") return productNameUa(base);
+  if(displayLanguage === "de") return productNameDe(base);
   if(displayLanguage === "pl") return productNamePl(name);
   if(displayLanguage === "sk") return productNameSk(name);
   return name;
@@ -7736,13 +7738,13 @@ function productDescSk(p){
 function productNameDe(name){
   let n = orderProductName(name);
   const repl = [
-    [/tablets/gi,"Tabletten"],[/tablet/gi,"Tablette"],[/capsules/gi,"Kapseln"],[/capsule/gi,"Kapsel"],[/cream/gi,"Creme"],[/ointment/gi,"Salbe"],[/syrup/gi,"Sirup"],[/drops/gi,"Tropfen"],[/spray/gi,"Spray"],[/sachets/gi,"Beutel"],[/lozenges/gi,"Lutschtabletten"],[/ampoules/gi,"Ampullen"],[/suspension/gi,"Suspension"],[/eye/gi,"Augen"],[/ear/gi,"Ohren"],[/nasal/gi,"Nasen"],[/oral/gi,"Mund"],[/sunscreen/gi,"Sonnencreme"],[/after sun/gi,"After Sun"],[/tanning oil/gi,"Sonnenöl"],[/kids/gi,"Kinder"],[/for adults/gi,"für Erwachsene"],[/hair mask/gi,"Haarmaske"],[/hair serum/gi,"Haarserum"],[/shampoo/gi,"Shampoo"],[/conditioner/gi,"Conditioner"],[/toothpaste/gi,"Zahnpasta"],[/sheet mask/gi,"Tuchmaske"],[/collagen/gi,"Kollagen"],[/hyaluronic acid/gi,"Hyaluronsäure"],[/vitamin/gi,"Vitamin"],[/black seed/gi,"Schwarzkümmel"],[/activated charcoal/gi,"Aktivkohle"],[/whey protein powder/gi,"Whey Protein Pulver"]
+    [/\btablets\b/gi,"Tabletten"],[/\btablet\b/gi,"Tablette"],[/capsules/gi,"Kapseln"],[/capsule/gi,"Kapsel"],[/cream/gi,"Creme"],[/ointment/gi,"Salbe"],[/syrup/gi,"Sirup"],[/drops/gi,"Tropfen"],[/spray/gi,"Spray"],[/sachets/gi,"Beutel"],[/lozenges/gi,"Lutschtabletten"],[/ampoules/gi,"Ampullen"],[/suspension/gi,"Suspension"],[/eye/gi,"Augen"],[/ear/gi,"Ohren"],[/nasal/gi,"Nasen"],[/oral/gi,"Mund"],[/sunscreen/gi,"Sonnencreme"],[/after sun/gi,"After Sun"],[/tanning oil/gi,"Sonnenöl"],[/kids/gi,"Kinder"],[/for adults/gi,"für Erwachsene"],[/hair mask/gi,"Haarmaske"],[/hair serum/gi,"Haarserum"],[/shampoo/gi,"Shampoo"],[/conditioner/gi,"Conditioner"],[/toothpaste/gi,"Zahnpasta"],[/sheet mask/gi,"Tuchmaske"],[/collagen/gi,"Kollagen"],[/hyaluronic acid/gi,"Hyaluronsäure"],[/vitamin/gi,"Vitamin"],[/black seed/gi,"Schwarzkümmel"],[/activated charcoal/gi,"Aktivkohle"],[/whey protein powder/gi,"Whey Protein Pulver"]
   ];
   repl.forEach(([a,b]) => n = n.replace(a,b));
   return n.replace(/\s{2,}/g," ").trim();
 }
 function productNameRu(name){
-  let n = String(name || "").trim();
+  let n = scCzPackToEn(String(name || "").trim());
 
   const phraseReplacements = [
     [/Enterogermina\s+2\s+Billion\s+perorální\s+suspenze/gi, "Enterogermina 2 Billion пероральная суспензия"],
@@ -7774,7 +7776,7 @@ function productNameRu(name){
   phraseReplacements.forEach(([pattern, value]) => { n = n.replace(pattern, value); });
 
   const wordReplacements = [
-    [/\btablety\b/gi, "таблетки"], [/\btablet\b/gi, "таблетки"], [/\btab\b/gi, "таблетки"],
+    [/\btablety\b/gi, "таблетки"], [/\btablets\b/gi, "таблетки"], [/\btablet\b/gi, "таблетки"], [/\btab\b/gi, "таблетки"],
     [/\bkapsle\b/gi, "капсулы"], [/\bcapsules\b/gi, "капсулы"], [/\bcapsule\b/gi, "капсулы"],
     [/\bkrém\b/gi, "крем"], [/\bcream\b/gi, "крем"], [/\bmast\b/gi, "мазь"],
     [/\bsirup\b/gi, "сироп"], [/\bsyrup\b/gi, "сироп"], [/\bkapky\b/gi, "капли"], [/\bdrops\b/gi, "капли"],
@@ -11730,8 +11732,20 @@ function scOrderNameEn(p){
 }
 /* sk51: Slovak customers get their own code 51 (Czech site stays 72) */
 function scSiteCode(){ return (typeof displayLanguage!=="undefined" && displayLanguage==="sk") ? 51 : 72; }
+/* packfix: Czech pack plurals -> English (Unicode-safe; JS \b does not work after í/ů) */
+function scCzPackToEn(name){
+  var n=String(name||"");
+  var R=[
+    [/šumivých\s+tablet(?![\p{L}])/giu,"effervescent tablets"],[/šumivých\s+sáčků(?![\p{L}])/giu,"effervescent sachets"],
+    [/žvýkacích\s+tablet(?![\p{L}])/giu,"chewable tablets"],[/orodispergovatelných\s+tablet(?![\p{L}])/giu,"orodispersible tablets"],
+    [/ústních\s+filmů(?![\p{L}])/giu,"oral films"],[/(?<![\p{L}])kapslí(?![\p{L}])/giu,"capsules"],[/(?<![\p{L}])sáčků(?![\p{L}])/giu,"sachets"],
+    [/(?<![\p{L}])ampulí(?![\p{L}])/giu,"ampoules"],[/(?<![\p{L}])čípků(?![\p{L}])/giu,"suppositories"],[/(\d+\s*)tablet(?![\p{L}])/giu,"$1tablets"],[/(?<![\p{L}])šampon(?![\p{L}])/giu,"shampoo"],[/(?<![\p{L}])česnek(?![\p{L}])/giu,"garlic"]
+  ];
+  R.forEach(function(r){ n=n.replace(r[0],r[1]); });
+  return n;
+}
 function orderProductName(name){
-  let n = String(name || "").trim();
+  let n = scCzPackToEn(String(name || "").trim());
 
   const phraseReplacements = [
     [/\bopalovac[ií]\s+kr[eé]m\b/gi, "sunscreen cream"],
@@ -12788,7 +12802,7 @@ html body .card-img-wrap img.zoom-out {
 <style>
 .sc-version-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.5);color:#fff;padding:3px 7px;border-radius:5px;font-size:11px;font-weight:900;z-index:9999;pointer-events:none}
 </style>
-<div class="sc-version-stamp" aria-hidden="true">v108.23</div>
+<div class="sc-version-stamp" aria-hidden="true">v108.24</div>
 <!-- v98→v99: Order Success Modal — clear confirmation with order number -->
 <div id="orderSuccessOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,45,60,.72);backdrop-filter:blur(6px);z-index:999999;align-items:center;justify-content:center;padding:20px;font-family:inherit;">
   <div style="background:#fff;border-radius:24px;max-width:360px;width:100%;padding:0;box-shadow:0 30px 80px rgba(0,0,0,.35);text-align:center;overflow:hidden;animation:sc-order-success-in .35s cubic-bezier(.16,1,.3,1);">
