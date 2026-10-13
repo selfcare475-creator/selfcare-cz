@@ -21,8 +21,7 @@
 
 <!-- v74: NON-BLOCKING font load. Page renders instantly with fallback font,
      then swaps to Nunito when it arrives. FCP improves massively on mobile. -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200..1000&display=swap" rel="stylesheet"></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary: #1b6db5;
@@ -13599,6 +13598,17 @@ function scStripDigits(el){
   #grid.kit-grid .kit-price-alt{font-size:9.5px!important;padding-left:5px!important}
   #grid.kit-grid .kit-add-all-btn{font-size:11px!important;padding:8px 6px!important;min-height:0!important;border-radius:11px!important;margin-top:auto!important}
   #grid.kit-grid .kit-view-hint{display:none!important}
+}
+</style>
+<style id="sc-card-type-en">
+/* v-card-type: product card text matches the English site */
+@media(max-width:560px){
+  #grid .card .card-name{font-size:12.5px!important;font-weight:900!important;line-height:1.3!important}
+  #grid .card .card-use-for{font-size:10.2px!important;font-weight:850!important;line-height:1.2!important;color:#4f5d70!important}
+  #grid .card .czk{font-weight:900!important}
+  #grid .card .badge-top{font-size:8.5px!important}
+  #grid .card .qty-pill-num{font-size:16px!important}
+  #grid .card .qty-symbol{font-size:17px!important}
 }
 </style>
 </body>
