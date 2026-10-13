@@ -13632,6 +13632,11 @@ function scStripDigits(el){
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init); else init();
 })();
 </script>
+<style id="sc-stable-cards">
+/* Match EN: images show instantly, no shimmer/fade blink on re-render */
+.card-img-wrap{background:#fff !important;animation:none !important;}
+.card-img-wrap img,#grid .card-img-wrap img{opacity:1 !important;transition:none !important;}
+</style>
 </body>
 </html>
 
